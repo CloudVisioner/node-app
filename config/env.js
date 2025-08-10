@@ -1,4 +1,4 @@
-// config/env.js (ESM)
+// config/env.js
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -16,7 +16,6 @@ export const config = {
   PORT: Number(process.env.PORT || 3000),
   MONGODB_URI: need("MONGODB_URI"),
   JWT_SECRET: need("JWT_SECRET"),
-  // Allow multiple origins if you comma-separate in .env
   CORS_ORIGINS: (process.env.CORS_ORIGIN || "*")
     .split(",")
     .map(s => s.trim())
