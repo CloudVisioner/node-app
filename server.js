@@ -12,17 +12,19 @@ import { config } from "./config/env.js"; // MONGODB_URI, JWT_SECRET, PORT, CORS
 
 /* -------------------- App & Middleware -------------------- */
 const app = express();
+app.set("trust proxy", 1); // ✅ correct IPs behind Render/proxies
 
 // security + logging
 app.use(helmet());
 app.use(morgan(config.NODE_ENV === "production" ? "combined" : "dev"));
 
-// CORS (allow list from .env)
+// CORS (allow list from .env, normalized)
 app.use(
   cors({
     origin: (origin, cb) => {
-      if (!origin) return cb(null, true); // curl/postman
-      if (config.CORS_ORIGINS.includes("*") || config.CORS_ORIGINS.includes(origin)) return cb(null, true);
+      const o = origin?.replace(/\/+$/, "");
+      if (!o) return cb(null, true); // curl/postman
+      if (config.CORS_ORIGINS.includes("*") || config.CORS_ORIGINS.includes(o)) return cb(null, true);
       cb(new Error("Not allowed by CORS"));
     },
     credentials: true,
@@ -93,6 +95,11 @@ async function requireOwner(req, res, next) {
 }
 
 /* -------------------- Routes -------------------- */
+// Root (friendly)
+app.get("/", (_req, res) => {
+  res.type("text").send("API is running. Try GET /health or /items");
+});
+
 // Health
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
 
